@@ -2,7 +2,6 @@ import os
 from typing import Optional, Callable, Any
 import logging
 from logging.handlers import RotatingFileHandler, TimedRotatingFileHandler
-import dotenv
 import boto3
 import pandas as pd
 from datetime import date, timedelta
@@ -11,7 +10,7 @@ import gspread
 from pydrive.auth import GoogleAuth
 from pydrive.drive import GoogleDrive
 from sqlalchemy import create_engine
-from google.oauth2.service_account import Credentials
+from CredManager import CredManager
 
 
 class GenericReportProcessor:
@@ -23,7 +22,7 @@ class GenericReportProcessor:
     rotation_interval = None
     backup_count_time = None
 
-    def __init__(self, log_file_path: str = 'default.log', log_level: str = 'INFO',
+    def __init__(self, cred_manager: callable = CredManager, log_file_path: str = 'logs/default.log', log_level: str = 'INFO',
                  max_log_size: int = 10485760, backup_count_size: int = 3,
                  rotation_interval: str = 'midnight', backup_count_time: int = 3):
         """
@@ -37,9 +36,15 @@ class GenericReportProcessor:
         :param rotation_interval: Log rotation interval for timed rotation ('S', 'M', 'H', 'D', 'midnight', etc.).
         :param backup_count_time: Number of backup log files to retain after rotation based on time.
         """
+        log_dir = os.path.dirname(log_file_path)
+        if not os.path.exists(log_dir):
+            os.makedirs(log_dir)
+            print(f"Created log directory: {log_dir}")
+
         if GenericReportProcessor.logger is None:
             self._initialize_logger(log_file_path, log_level, max_log_size, backup_count_size, rotation_interval, backup_count_time)
 
+        self.cred_manager = cred_manager
         self._s3 = None
         self._slack = None
         self._gc = None
@@ -149,8 +154,7 @@ class GenericReportProcessor:
     def s3(self):
         if self._s3 is None:
             self.logger.debug("Initializing S3 service.")
-            aws_access_key_id = os.getenv('AWS_ACCESS_KEY_ID')
-            aws_secret_access_key = os.getenv('AWS_SECRET_ACCESS_KEY')
+            aws_access_key_id, aws_secret_access_key = self.cred_manager.get_aws_credentials()
             if aws_access_key_id and aws_secret_access_key:
                 self._s3 = boto3.resource(
                     's3',
@@ -168,7 +172,7 @@ class GenericReportProcessor:
     def slack(self):
         if self._slack is None:
             self.logger.debug("Initializing Slack client.")
-            slack_token = os.getenv('SLACK_TOKEN')
+            slack_token = self.cred_manager.get_slack_token()
             if slack_token:
                 self._slack = WebClient(slack_token)
                 self.logger.info("Slack client initialized successfully.")
@@ -181,10 +185,8 @@ class GenericReportProcessor:
     def gc(self):
         if self._gc is None:
             self.logger.debug("Initializing Google Sheets client.")
-            google_creds_key_path = os.getenv('GOOGLE_CREDS_KEY_PATH')
-            if google_creds_key_path:
-                scopes = ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive']
-                google_creds = Credentials.from_service_account_file(google_creds_key_path, scopes=scopes)
+            google_creds = self.cred_manager.get_google_credentials()
+            if google_creds:
                 self._gc = gspread.authorize(google_creds)
                 self.logger.info("Google Sheets client initialized successfully.")
             else:
@@ -205,13 +207,10 @@ class GenericReportProcessor:
     def db_conn(self):
         if self._db_conn is None:
             self.logger.debug("Initializing Redshift connection.")
-            db_user = os.getenv('DB_USER')
-            db_password = os.getenv('DB_PASSWORD')
-            db_host = os.getenv('DB_HOST')
-            db_name = os.getenv('DB_NAME')
-            if db_user and db_password and db_host and db_name:
+            db_credentials = self.cred_manager.get_db_credentials()
+            if db_credentials:
                 try:
-                    engine = create_engine(f'redshift+psycopg2://{db_user}:{db_password}@{db_host}:5439/{db_name}',
+                    engine = create_engine(f'redshift+psycopg2://{db_credentials["user"]}:{db_credentials["password"]}@{db_credentials["host"]}:5439/{db_credentials["db_name"]}',
                                            connect_args={"keepalives": 1, "keepalives_idle": 60, "keepalives_interval": 60})
                     self._db_conn = engine.connect()
                     self.logger.info("Redshift connection initialized successfully.")
@@ -242,21 +241,25 @@ class GenericReportProcessor:
         :param services: Optional list of services to configure (e.g., ['s3', 'slack', 'google_drive']).
                          If None, it assumes all services should be configured.
         """
-        dotenv.load_dotenv()
+        self.logger.info("Setting up the environment for the required services.")
         self.calculate_dates()
 
         if services is None:
             services = ['s3', 'slack', 'google_drive', 'redshift']
 
         for service in services:
-            if service == 'slack' and not os.getenv('SLACK_TOKEN'):
-                self.logger.warning("Slack is not properly configured. SLACK_TOKEN is missing.")
-            if service == 's3' and (not os.getenv('AWS_ACCESS_KEY_ID') or not os.getenv('AWS_SECRET_ACCESS_KEY')):
-                self.logger.warning("S3 is not properly configured. AWS credentials are missing.")
-            if service == 'google_drive' and not os.getenv('GOOGLE_CREDS_KEY_PATH'):
-                self.logger.warning("Google Drive/Sheets is not properly configured. Google credentials are missing.")
-            if service == 'redshift' and (not os.getenv('DB_USER') or not os.getenv('DB_PASSWORD') or not os.getenv('DB_HOST') or not os.getenv('DB_NAME')):
-                self.logger.warning("Redshift is not properly configured. Redshift credentials are missing.")
+            try:
+                if service == 'slack' and not self.cred_manager.get_slack_token():
+                    self.logger.warning("Slack is not properly configured. SLACK_TOKEN is missing.")
+                if service == 's3' and not self.cred_manager.get_aws_credentials():
+                    self.logger.warning("S3 is not properly configured. AWS credentials are missing.")
+                if service == 'google_drive' and not self.cred_manager.get_google_credentials():
+                    self.logger.warning("Google Drive/Sheets is not properly configured. Google credentials are missing.")
+                if service == 'redshift' and not self.cred_manager.get_db_credentials():
+                    self.logger.warning("Redshift is not properly configured. Redshift credentials are missing.")
+            except ValueError as e:
+                self.logger.error(f"Error setting up environment for service {service}: {e}")
+                raise
 
         self.logger.info("Environment setup complete. Services will be initialized lazily when accessed.")
 
