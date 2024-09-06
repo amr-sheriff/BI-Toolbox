@@ -32,10 +32,26 @@ class GenericReportProcessor:
         self.second_week_before: Optional[date] = None
         self.third_week_before: Optional[date] = None
 
-    def setup_environment(self) -> None:
+
+    @classmethod
+    def factory(cls, services: Optional[list] = None):
+        """
+        Factory method to initialize the GenericReportProcessor with selected services.
+
+        :param services: List of services to initialize (like 's3', 'slack', 'google_drive', 'redshift').
+                         If None, initialize all services.
+        :return: GenericReportProcessor instance
+        """
+        instance = cls()
+        instance.setup_environment(services)
+        return instance
+
+
+    def setup_environment(self, services: Optional[list] = None) -> None:
         """
         Loads environment variables and initializes connections for Slack, S3, Google Sheets, and Redshift.
         Also calculates week and date attributes for easier reference throughout the class.
+        If no services are specified, initializes all available services.
 
         :raises ValueError: If essential environment variables are missing.
         """
@@ -49,50 +65,54 @@ class GenericReportProcessor:
         self.third_week_before = self.current_week - timedelta(days=21)
 
         # Slack setup
-        slack_token = os.getenv('SLACK_TOKEN')
-        if slack_token:
-            self.slack = WebClient(slack_token)
-        else:
-            self.logger.warning("Slack token not found. Slack notifications will be unavailable.")
+        if not services or 'slack' in services:
+            slack_token = os.getenv('SLACK_TOKEN')
+            if slack_token:
+                self.slack = WebClient(slack_token)
+            else:
+                self.logger.warning("Slack token not found. Slack notifications will be unavailable.")
 
         # AWS S3 setup using boto3 resource
-        aws_access_key_id = os.getenv('AWS_ACCESS_KEY_ID')
-        aws_secret_access_key = os.getenv('AWS_SECRET_ACCESS_KEY')
-        if aws_access_key_id and aws_secret_access_key:
-            self.s3 = boto3.resource(
-                's3',
-                aws_access_key_id=aws_access_key_id,
-                aws_secret_access_key=aws_secret_access_key
-            )
-        else:
-            self.logger.warning("AWS S3 credentials missing. S3 data retrieval will be unavailable.")
+        if not services or 's3' in services:
+            aws_access_key_id = os.getenv('AWS_ACCESS_KEY_ID')
+            aws_secret_access_key = os.getenv('AWS_SECRET_ACCESS_KEY')
+            if aws_access_key_id and aws_secret_access_key:
+                self.s3 = boto3.resource(
+                    's3',
+                    aws_access_key_id=aws_access_key_id,
+                    aws_secret_access_key=aws_secret_access_key
+                )
+            else:
+                self.logger.warning("AWS S3 credentials missing. S3 data retrieval will be unavailable.")
 
         # Google Sheets setup
-        google_creds_key_path = os.getenv('GOOGLE_CREDS_KEY_PATH')
-        if google_creds_key_path:
-            scopes = ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive']
-            google_creds = Credentials.from_service_account_file(google_creds_key_path, scopes=scopes)
-            self.gc = gspread.authorize(google_creds)
-            gauth = GoogleAuth()
-            self.drive = GoogleDrive(gauth)
-        else:
-            self.logger.warning("Google credentials missing. Google Sheets and Drive functionality will be unavailable.")
+        if not services or 'google_drive' in services:
+            google_creds_key_path = os.getenv('GOOGLE_CREDS_KEY_PATH')
+            if google_creds_key_path:
+                scopes = ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive']
+                google_creds = Credentials.from_service_account_file(google_creds_key_path, scopes=scopes)
+                self.gc = gspread.authorize(google_creds)
+                gauth = GoogleAuth()
+                self.drive = GoogleDrive(gauth)
+            else:
+                self.logger.warning("Google credentials missing. Google Sheets and Drive functionality will be unavailable.")
 
         # Redshift connection setup
-        db_user = os.getenv('DB_USER')
-        db_password = os.getenv('DB_PASSWORD')
-        db_host = os.getenv('DB_HOST')
-        db_name = os.getenv('DB_NAME')
-        if db_user and db_password and db_host and db_name:
-            try:
-                engine = create_engine(f'redshift+psycopg2://{db_user}:{db_password}@{db_host}:5439/{db_name}',
-                                       connect_args={"keepalives": 1, "keepalives_idle": 60, "keepalives_interval": 60})
-                self.db_conn = engine.connect()
-            except Exception as e:
-                self.logger.error(f"Error connecting to Redshift: {e}")
-                raise ConnectionError(f"Failed to connect to Redshift: {e}")
-        else:
-            self.logger.warning("Redshift credentials missing. Database functionality will be unavailable.")
+        if not services or 'redshift' in services:
+            db_user = os.getenv('DB_USER')
+            db_password = os.getenv('DB_PASSWORD')
+            db_host = os.getenv('DB_HOST')
+            db_name = os.getenv('DB_NAME')
+            if db_user and db_password and db_host and db_name:
+                try:
+                    engine = create_engine(f'redshift+psycopg2://{db_user}:{db_password}@{db_host}:5439/{db_name}',
+                                           connect_args={"keepalives": 1, "keepalives_idle": 60, "keepalives_interval": 60})
+                    self.db_conn = engine.connect()
+                except Exception as e:
+                    self.logger.error(f"Error connecting to Redshift: {e}")
+                    raise ConnectionError(f"Failed to connect to Redshift: {e}")
+            else:
+                self.logger.warning("Redshift credentials missing. Database functionality will be unavailable.")
 
 
     @classmethod
