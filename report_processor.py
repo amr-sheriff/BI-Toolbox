@@ -16,6 +16,12 @@ from google.oauth2.service_account import Credentials
 
 class GenericReportProcessor:
     logger = None
+    log_file_path = None
+    log_level = None
+    max_log_size = None
+    backup_count_size = None
+    rotation_interval = None
+    backup_count_time = None
 
     def __init__(self, log_file_path: str = 'default.log', log_level: str = 'INFO',
                  max_log_size: int = 10485760, backup_count_size: int = 3,
@@ -31,13 +37,6 @@ class GenericReportProcessor:
         :param rotation_interval: Log rotation interval for timed rotation ('S', 'M', 'H', 'D', 'midnight', etc.).
         :param backup_count_time: Number of backup log files to retain after rotation based on time.
         """
-        self.log_file_path = log_file_path
-        self.log_level = log_level
-        self.max_log_size = max_log_size
-        self.backup_count_size = backup_count_size
-        self.rotation_interval = rotation_interval
-        self.backup_count_time = backup_count_time
-
         if GenericReportProcessor.logger is None:
             self._initialize_logger(log_file_path, log_level, max_log_size, backup_count_size, rotation_interval, backup_count_time)
 
@@ -87,6 +86,14 @@ class GenericReportProcessor:
             console_handler.setFormatter(console_format)
             cls.logger.addHandler(console_handler)
 
+            # Store log rotation values as class-level attributes
+            cls.log_file_path = log_file_path
+            cls.log_level = log_level
+            cls.max_log_size = max_log_size
+            cls.backup_count_size = backup_count_size
+            cls.rotation_interval = rotation_interval
+            cls.backup_count_time = backup_count_time
+
             # Log the start of the logging process
             cls.logger.info(f"Logger initialized. Logging to file: {log_file_path} with both size-based and time-based rotation, and console.")
 
@@ -99,17 +106,15 @@ class GenericReportProcessor:
         :return: None
         """
         if cls.logger is not None:
-            # Remove only the file handlers (keep console handler)
             for handler in cls.logger.handlers[:]:
                 if isinstance(handler, (RotatingFileHandler, TimedRotatingFileHandler)):
                     cls.logger.removeHandler(handler)
 
-            # Use instance attributes for log rotation settings
-            file_size_handler = RotatingFileHandler(path, maxBytes=cls().max_log_size, backupCount=cls().backup_count_size)
+            file_size_handler = RotatingFileHandler(path, maxBytes=cls.max_log_size, backupCount=cls.backup_count_size)
             file_size_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
             cls.logger.addHandler(file_size_handler)
 
-            timed_handler = TimedRotatingFileHandler(path, when=cls().rotation_interval, interval=1, backupCount=cls().backup_count_time)
+            timed_handler = TimedRotatingFileHandler(path, when=cls.rotation_interval, interval=1, backupCount=cls.backup_count_time)
             timed_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
             cls.logger.addHandler(timed_handler)
 
