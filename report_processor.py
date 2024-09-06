@@ -63,30 +63,25 @@ class GenericReportProcessor:
         :param rotation_interval: Time interval for rotating log files ('midnight' for daily rotation, or 'S', 'M', 'H', 'D').
         :param backup_count_time: Number of backup log files to retain after time-based rotation.
         """
-        cls.logger = logging.getLogger(__name__)  # Using module-level name (__name__) for the logger
-        cls.logger.setLevel(logging.getLevelName(log_level.upper()))  # Set the log level
+        cls.logger = logging.getLogger(__name__)
+        cls.logger.setLevel(logging.getLevelName(log_level.upper()))
 
-        # Check if logger already has handlers to avoid duplicate handlers
         if not cls.logger.handlers:
-            # Create a rotating file handler (based on file size)
             file_size_handler = RotatingFileHandler(log_file_path, maxBytes=max_log_size, backupCount=backup_count_size)
             file_size_format = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
             file_size_handler.setFormatter(file_size_format)
             cls.logger.addHandler(file_size_handler)
 
-            # Create a timed rotating file handler (based on time intervals)
             timed_handler = TimedRotatingFileHandler(log_file_path, when=rotation_interval, interval=1, backupCount=backup_count_time)
             timed_format = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
             timed_handler.setFormatter(timed_format)
             cls.logger.addHandler(timed_handler)
 
-            # Create a console handler to log to console (stdout)
             console_handler = logging.StreamHandler()
             console_format = logging.Formatter('%(name)s - %(levelname)s - %(message)s')
             console_handler.setFormatter(console_format)
             cls.logger.addHandler(console_handler)
 
-            # Store log rotation values as class-level attributes
             cls.log_file_path = log_file_path
             cls.log_level = log_level
             cls.max_log_size = max_log_size
@@ -94,7 +89,6 @@ class GenericReportProcessor:
             cls.rotation_interval = rotation_interval
             cls.backup_count_time = backup_count_time
 
-            # Log the start of the logging process
             cls.logger.info(f"Logger initialized. Logging to file: {log_file_path} with both size-based and time-based rotation, and console.")
 
     @classmethod
@@ -121,16 +115,34 @@ class GenericReportProcessor:
             cls.logger.info(f"Logger file path changed to {path}")
 
     @classmethod
-    def factory(cls, services: Optional[list] = None):
+    def factory(cls, services: Optional[list] = None, eager: bool = False):
         """
         Factory method to initialize the GenericReportProcessor with selected services.
 
         :param services: List of services to initialize (like 's3', 'slack', 'google_drive', 'redshift').
                          If None, initialize all services.
+        :param eager: Boolean flag to initialize all services upfront if True (lazy initialization by default).
         :return: GenericReportProcessor instance
         """
         instance = cls()
         instance.setup_environment(services)
+
+        if eager:
+            instance.logger.info("Eager initialization mode enabled. Initializing all services upfront.")
+            for service in services:
+                if service == 's3':
+                    _ = instance.s3
+                elif service == 'slack':
+                    _ = instance.slack
+                elif service == 'google_drive':
+                    _ = instance.gc
+                    _ = instance.drive
+                elif service == 'redshift':
+                    _ = instance.db_conn
+            instance.logger.info("All services initialized eagerly.")
+        else:
+            instance.logger.info("Lazy initialization mode enabled. Services will be initialized on demand.")
+
         return instance
 
     @property
@@ -151,7 +163,7 @@ class GenericReportProcessor:
                 self._s3 = None
         return self._s3
 
-    # Lazy initialization for Slack
+    # Lazy initialization
     @property
     def slack(self):
         if self._slack is None:
@@ -165,7 +177,6 @@ class GenericReportProcessor:
                 self._slack = None
         return self._slack
 
-    # Lazy initialization for Google Sheets and Google Drive
     @property
     def gc(self):
         if self._gc is None:
@@ -190,7 +201,6 @@ class GenericReportProcessor:
             self.logger.info("Google Drive client initialized successfully.")
         return self._drive
 
-    # Lazy initialization for Redshift
     @property
     def db_conn(self):
         if self._db_conn is None:
@@ -223,7 +233,6 @@ class GenericReportProcessor:
         self.second_week_before = self.current_week - timedelta(days=14)
         self.third_week_before = self.current_week - timedelta(days=21)
 
-
     def setup_environment(self, services: Optional[list] = None) -> None:
         """
         Loads environment variables and sets up configurations.
@@ -234,12 +243,10 @@ class GenericReportProcessor:
                          If None, it assumes all services should be configured.
         """
         dotenv.load_dotenv()
-
-        # Calculate week and date attributes
         self.calculate_dates()
 
         if services is None:
-            services = ['s3', 'slack', 'google_drive', 'redshift']  # Default to initializing all services
+            services = ['s3', 'slack', 'google_drive', 'redshift']
 
         for service in services:
             if service == 'slack' and not os.getenv('SLACK_TOKEN'):
@@ -252,7 +259,6 @@ class GenericReportProcessor:
                 self.logger.warning("Redshift is not properly configured. Redshift credentials are missing.")
 
         self.logger.info("Environment setup complete. Services will be initialized lazily when accessed.")
-
 
     def retrieve_data(self, data_source_type: str, *, bucket_name: str = None, prefix: str = None, query: str = None, file_path: str = None) -> pd.DataFrame:
         """
@@ -302,7 +308,7 @@ class GenericReportProcessor:
         :returns: pd.DataFrame: The data from the latest file as a Pandas DataFrame.
         """
         self.logger.debug(f"Attempting to retrieve data from S3 bucket: {bucket_name} with prefix: {prefix}")
-        if not self.s3:  # Uses the lazy-initialized property
+        if not self.s3:
             raise ValueError("S3 is not initialized. Cannot retrieve data.")
 
         try:
@@ -338,7 +344,7 @@ class GenericReportProcessor:
         :returns: pd.DataFrame: The result of the query as a Pandas DataFrame.
         """
         self.logger.debug("Attempting to execute SQL query.")
-        if not self.db_conn:  # Uses the lazy-initialized property
+        if not self.db_conn:
             raise ValueError("Redshift connection is not initialized. Cannot retrieve data.")
 
         try:
@@ -391,7 +397,7 @@ class GenericReportProcessor:
                 if name in processing_functions:
                     processed_dataframes[name] = processing_functions[name](dataframe)
                 else:
-                    processed_dataframes[name] = dataframe  # If no processing function, return the DataFrame as is
+                    processed_dataframes[name] = dataframe
             GenericReportProcessor.logger.info(f"Data processed successfully")
             return processed_dataframes
         except Exception as e:
@@ -530,19 +536,17 @@ class GenericReportProcessor:
         """
         self.logger.debug(f"Attempting to export data to Google Sheets: {sheet_name} in document {sheet_id}")
 
-        if not self.gc:  # Uses the lazy-initialized Google Sheets client
+        if not self.gc:
             raise ValueError("Google Sheets client is not initialized. Cannot export data.")
-        if not self.drive:  # Uses the lazy-initialized Google Drive client
+        if not self.drive:
             raise ValueError("Google Drive client is not initialized. Cannot export data.")
 
         try:
-            # Cast specified date columns to string
             if date_columns:
                 for col in date_columns:
                     if col in data.columns:
                         data[col] = data[col].astype(str)
             else:
-                # Automatically detect and convert datetime columns
                 date_columns_auto = data.select_dtypes(include=['datetime']).columns
                 data[date_columns_auto] = data[date_columns_auto].astype(str)
 
@@ -550,11 +554,9 @@ class GenericReportProcessor:
             worksheet = gs.worksheet(sheet_name)
 
             if first_time:
-                # Clear the sheet and populate it from scratch
                 worksheet.clear()
                 gs.set_with_dataframe(worksheet=worksheet, dataframe=data, include_index=False, include_column_header=True, resize=True)
             else:
-                # Append data to Google Sheet
                 data_values = data.values.tolist()
                 gs.values_append(sheet_name, {'valueInputOption': 'RAW'}, {'values': data_values})
 
@@ -576,7 +578,7 @@ class GenericReportProcessor:
         :raises: ValueError if the Slack token is missing.
         """
         self.logger.info(f"Sending Slack notification to channel: {channel_name}")
-        if not self.slack:  # Uses the lazy-initialized property
+        if not self.slack:
             raise ConnectionError("Slack is not initialized. Cannot send notification.")
 
         try:
