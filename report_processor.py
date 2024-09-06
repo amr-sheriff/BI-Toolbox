@@ -1,6 +1,7 @@
 import os
-from typing import Optional
+from typing import Optional, Callable, Any
 import logging
+from logging.handlers import RotatingFileHandler, TimedRotatingFileHandler
 import dotenv
 import boto3
 import pandas as pd
@@ -14,24 +15,105 @@ from google.oauth2.service_account import Credentials
 
 
 class GenericReportProcessor:
-    logger = logging.getLogger('GenericReportProcessor')
-    logger.setLevel(logging.INFO)
-    log_handler = logging.FileHandler('default.log')
-    log_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
-    logger.addHandler(log_handler)
+    logger = None
 
-    def __init__(self):
-        self.s3 = None
-        self.s3_client = None
-        self.slack = None
-        self.gc = None
-        self.drive = None
-        self.db_conn = None
+    def __init__(self, log_file_path: str = 'default.log', log_level: str = 'INFO',
+                 max_log_size: int = 10485760, backup_count_size: int = 3,
+                 rotation_interval: str = 'midnight', backup_count_time: int = 3):
+        """
+        Initialize the processor with a configurable log file path, log level, and log rotation
+        based on both file size and time intervals.
+
+        :param log_file_path: Path to the log file.
+        :param log_level: Logging level as a string (e.g., 'DEBUG', 'INFO').
+        :param max_log_size: Maximum log file size in bytes before rotating based on size.
+        :param backup_count_size: Number of backup log files to retain after rotation based on size.
+        :param rotation_interval: Log rotation interval for timed rotation ('S', 'M', 'H', 'D', 'midnight', etc.).
+        :param backup_count_time: Number of backup log files to retain after rotation based on time.
+        """
+        self.log_file_path = log_file_path
+        self.log_level = log_level
+        self.max_log_size = max_log_size
+        self.backup_count_size = backup_count_size
+        self.rotation_interval = rotation_interval
+        self.backup_count_time = backup_count_time
+
+        if GenericReportProcessor.logger is None:
+            self._initialize_logger(log_file_path, log_level, max_log_size, backup_count_size, rotation_interval, backup_count_time)
+
+        self._s3 = None
+        self._slack = None
+        self._gc = None
+        self._drive = None
+        self._db_conn = None
         self.current_week: Optional[date] = None
         self.last_week: Optional[date] = None
         self.second_week_before: Optional[date] = None
         self.third_week_before: Optional[date] = None
 
+    @classmethod
+    def _initialize_logger(cls, log_file_path: str, log_level: str, max_log_size: int, backup_count_size: int,
+                           rotation_interval: str, backup_count_time: int) -> None:
+        """
+        Class method to initialize the logger with both file size-based and time-based rotation.
+
+        :param log_file_path: Path to the log file.
+        :param log_level: Logging level as a string (e.g., 'DEBUG', 'INFO').
+        :param max_log_size: Maximum log file size in bytes before rotating based on size.
+        :param backup_count_size: Number of backup log files to retain after size-based rotation.
+        :param rotation_interval: Time interval for rotating log files ('midnight' for daily rotation, or 'S', 'M', 'H', 'D').
+        :param backup_count_time: Number of backup log files to retain after time-based rotation.
+        """
+        cls.logger = logging.getLogger(__name__)  # Using module-level name (__name__) for the logger
+        cls.logger.setLevel(logging.getLevelName(log_level.upper()))  # Set the log level
+
+        # Check if logger already has handlers to avoid duplicate handlers
+        if not cls.logger.handlers:
+            # Create a rotating file handler (based on file size)
+            file_size_handler = RotatingFileHandler(log_file_path, maxBytes=max_log_size, backupCount=backup_count_size)
+            file_size_format = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+            file_size_handler.setFormatter(file_size_format)
+            cls.logger.addHandler(file_size_handler)
+
+            # Create a timed rotating file handler (based on time intervals)
+            timed_handler = TimedRotatingFileHandler(log_file_path, when=rotation_interval, interval=1, backupCount=backup_count_time)
+            timed_format = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+            timed_handler.setFormatter(timed_format)
+            cls.logger.addHandler(timed_handler)
+
+            # Create a console handler to log to console (stdout)
+            console_handler = logging.StreamHandler()
+            console_format = logging.Formatter('%(name)s - %(levelname)s - %(message)s')
+            console_handler.setFormatter(console_format)
+            cls.logger.addHandler(console_handler)
+
+            # Log the start of the logging process
+            cls.logger.info(f"Logger initialized. Logging to file: {log_file_path} with both size-based and time-based rotation, and console.")
+
+    @classmethod
+    def set_logger_path(cls, path: str) -> None:
+        """
+        Class method to change the logger file path.
+
+        :param path: str - The new path for the log file.
+        :return: None
+        """
+        if cls.logger is not None:
+            # Remove only the file handlers (keep console handler)
+            for handler in cls.logger.handlers[:]:
+                if isinstance(handler, (RotatingFileHandler, TimedRotatingFileHandler)):
+                    cls.logger.removeHandler(handler)
+
+            # Use instance attributes for log rotation settings
+            file_size_handler = RotatingFileHandler(path, maxBytes=cls().max_log_size, backupCount=cls().backup_count_size)
+            file_size_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+            cls.logger.addHandler(file_size_handler)
+
+            timed_handler = TimedRotatingFileHandler(path, when=cls().rotation_interval, interval=1, backupCount=cls().backup_count_time)
+            timed_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+            cls.logger.addHandler(timed_handler)
+
+            cls.logger.info(f"Logger file path changed to {path}")
 
     @classmethod
     def factory(cls, services: Optional[list] = None):
@@ -46,59 +128,68 @@ class GenericReportProcessor:
         instance.setup_environment(services)
         return instance
 
-
-    def setup_environment(self, services: Optional[list] = None) -> None:
-        """
-        Loads environment variables and initializes connections for Slack, S3, Google Sheets, and Redshift.
-        Also calculates week and date attributes for easier reference throughout the class.
-        If no services are specified, initializes all available services.
-
-        :raises ValueError: If essential environment variables are missing.
-        """
-        dotenv.load_dotenv()
-
-        # Calculate week and date attributes
-        today = date.today()
-        self.current_week = today - timedelta(days=today.weekday())
-        self.last_week = self.current_week - timedelta(days=7)
-        self.second_week_before = self.current_week - timedelta(days=14)
-        self.third_week_before = self.current_week - timedelta(days=21)
-
-        # Slack setup
-        if not services or 'slack' in services:
-            slack_token = os.getenv('SLACK_TOKEN')
-            if slack_token:
-                self.slack = WebClient(slack_token)
-            else:
-                self.logger.warning("Slack token not found. Slack notifications will be unavailable.")
-
-        # AWS S3 setup using boto3 resource
-        if not services or 's3' in services:
+    @property
+    def s3(self):
+        if self._s3 is None:
+            self.logger.debug("Initializing S3 service.")
             aws_access_key_id = os.getenv('AWS_ACCESS_KEY_ID')
             aws_secret_access_key = os.getenv('AWS_SECRET_ACCESS_KEY')
             if aws_access_key_id and aws_secret_access_key:
-                self.s3 = boto3.resource(
+                self._s3 = boto3.resource(
                     's3',
                     aws_access_key_id=aws_access_key_id,
                     aws_secret_access_key=aws_secret_access_key
                 )
+                self.logger.info("S3 initialized successfully.")
             else:
                 self.logger.warning("AWS S3 credentials missing. S3 data retrieval will be unavailable.")
+                self._s3 = None
+        return self._s3
 
-        # Google Sheets setup
-        if not services or 'google_drive' in services:
+    # Lazy initialization for Slack
+    @property
+    def slack(self):
+        if self._slack is None:
+            self.logger.debug("Initializing Slack client.")
+            slack_token = os.getenv('SLACK_TOKEN')
+            if slack_token:
+                self._slack = WebClient(slack_token)
+                self.logger.info("Slack client initialized successfully.")
+            else:
+                self.logger.warning("Slack token not found. Slack notifications will be unavailable.")
+                self._slack = None
+        return self._slack
+
+    # Lazy initialization for Google Sheets and Google Drive
+    @property
+    def gc(self):
+        if self._gc is None:
+            self.logger.debug("Initializing Google Sheets client.")
             google_creds_key_path = os.getenv('GOOGLE_CREDS_KEY_PATH')
             if google_creds_key_path:
                 scopes = ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive']
                 google_creds = Credentials.from_service_account_file(google_creds_key_path, scopes=scopes)
-                self.gc = gspread.authorize(google_creds)
-                gauth = GoogleAuth()
-                self.drive = GoogleDrive(gauth)
+                self._gc = gspread.authorize(google_creds)
+                self.logger.info("Google Sheets client initialized successfully.")
             else:
-                self.logger.warning("Google credentials missing. Google Sheets and Drive functionality will be unavailable.")
+                self.logger.warning("Google credentials missing. Google Sheets functionality will be unavailable.")
+                self._gc = None
+        return self._gc
 
-        # Redshift connection setup
-        if not services or 'redshift' in services:
+    @property
+    def drive(self):
+        if self._drive is None:
+            self.logger.debug("Initializing Google Drive client.")
+            gauth = GoogleAuth()
+            self._drive = GoogleDrive(gauth)
+            self.logger.info("Google Drive client initialized successfully.")
+        return self._drive
+
+    # Lazy initialization for Redshift
+    @property
+    def db_conn(self):
+        if self._db_conn is None:
+            self.logger.debug("Initializing Redshift connection.")
             db_user = os.getenv('DB_USER')
             db_password = os.getenv('DB_PASSWORD')
             db_host = os.getenv('DB_HOST')
@@ -107,27 +198,55 @@ class GenericReportProcessor:
                 try:
                     engine = create_engine(f'redshift+psycopg2://{db_user}:{db_password}@{db_host}:5439/{db_name}',
                                            connect_args={"keepalives": 1, "keepalives_idle": 60, "keepalives_interval": 60})
-                    self.db_conn = engine.connect()
+                    self._db_conn = engine.connect()
+                    self.logger.info("Redshift connection initialized successfully.")
                 except Exception as e:
                     self.logger.error(f"Error connecting to Redshift: {e}")
                     raise ConnectionError(f"Failed to connect to Redshift: {e}")
             else:
                 self.logger.warning("Redshift credentials missing. Database functionality will be unavailable.")
+                self._db_conn = None
+        return self._db_conn
 
-
-    @classmethod
-    def set_logger_path(cls, path: str) -> None:
+    def calculate_dates(self):
         """
-        Class method to change the logger file path.
-
-        :param path: str - The new path for the log file.
-        :return: None
+        Calculate week and date attributes for easier reference throughout the class.
         """
-        cls.logger.removeHandler(cls.log_handler)
-        cls.log_handler = logging.FileHandler(path)
-        cls.log_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
-        cls.logger.addHandler(cls.log_handler)
-        cls.logger.info(f'Logger path changed to {path}')
+        today = date.today()
+        self.current_week = today - timedelta(days=today.weekday())
+        self.last_week = self.current_week - timedelta(days=7)
+        self.second_week_before = self.current_week - timedelta(days=14)
+        self.third_week_before = self.current_week - timedelta(days=21)
+
+
+    def setup_environment(self, services: Optional[list] = None) -> None:
+        """
+        Loads environment variables and sets up configurations.
+        Services (S3, Slack, Google Sheets, Redshift) are not initialized here,
+        but will be lazily initialized when accessed.
+
+        :param services: Optional list of services to configure (e.g., ['s3', 'slack', 'google_drive']).
+                         If None, it assumes all services should be configured.
+        """
+        dotenv.load_dotenv()
+
+        # Calculate week and date attributes
+        self.calculate_dates()
+
+        if services is None:
+            services = ['s3', 'slack', 'google_drive', 'redshift']  # Default to initializing all services
+
+        for service in services:
+            if service == 'slack' and not os.getenv('SLACK_TOKEN'):
+                self.logger.warning("Slack is not properly configured. SLACK_TOKEN is missing.")
+            if service == 's3' and (not os.getenv('AWS_ACCESS_KEY_ID') or not os.getenv('AWS_SECRET_ACCESS_KEY')):
+                self.logger.warning("S3 is not properly configured. AWS credentials are missing.")
+            if service == 'google_drive' and not os.getenv('GOOGLE_CREDS_KEY_PATH'):
+                self.logger.warning("Google Drive/Sheets is not properly configured. Google credentials are missing.")
+            if service == 'redshift' and (not os.getenv('DB_USER') or not os.getenv('DB_PASSWORD') or not os.getenv('DB_HOST') or not os.getenv('DB_NAME')):
+                self.logger.warning("Redshift is not properly configured. Redshift credentials are missing.")
+
+        self.logger.info("Environment setup complete. Services will be initialized lazily when accessed.")
 
 
     def retrieve_data(self, data_source_type: str, *, bucket_name: str = None, prefix: str = None, query: str = None, file_path: str = None) -> pd.DataFrame:
@@ -177,7 +296,9 @@ class GenericReportProcessor:
 
         :returns: pd.DataFrame: The data from the latest file as a Pandas DataFrame.
         """
-        self.logger.info(f"Retrieving data from S3 bucket: {bucket_name} with prefix: {prefix}")
+        self.logger.debug(f"Attempting to retrieve data from S3 bucket: {bucket_name} with prefix: {prefix}")
+        if not self.s3:  # Uses the lazy-initialized property
+            raise ValueError("S3 is not initialized. Cannot retrieve data.")
 
         try:
             bucket = self.s3.Bucket(bucket_name)
@@ -188,16 +309,15 @@ class GenericReportProcessor:
 
             objects.sort(key=lambda o: o.last_modified)
             latest_file_key = objects[-1].key
-            obj = bucket.Object(latest_file_key).get()
+            self.logger.debug(f"Latest file found in S3: {latest_file_key}")
 
-            self.logger.info(f"Latest file retrieved from S3: {latest_file_key}")
+            obj = bucket.Object(latest_file_key).get()
 
             if latest_file_key.endswith('.csv'):
                 return pd.read_csv(obj['Body'])
             elif latest_file_key.endswith('.parquet'):
                 return pd.read_parquet(obj['Body'], engine='pyarrow')
             else:
-                self.logger.error(f"Unsupported file type for file: {latest_file_key}")
                 raise ValueError(f"Unsupported file type for file: {latest_file_key}")
         except Exception as e:
             self.logger.error(f"Error retrieving data from S3: {str(e)}")
@@ -212,14 +332,17 @@ class GenericReportProcessor:
 
         :returns: pd.DataFrame: The result of the query as a Pandas DataFrame.
         """
-        self.logger.info(f"Executing SQL query")
+        self.logger.debug("Attempting to execute SQL query.")
+        if not self.db_conn:  # Uses the lazy-initialized property
+            raise ValueError("Redshift connection is not initialized. Cannot retrieve data.")
+
         try:
             df = pd.read_sql(query, self.db_conn)
             self.logger.info(f"SQL query executed successfully")
             return df
         except Exception as e:
             self.logger.error(f"Error executing SQL query: {e}")
-            raise ValueError(f"Error executing SQL query: {e}")
+            raise
 
     @staticmethod
     def _retrieve_from_local(file_path: str) -> pd.DataFrame:
@@ -245,7 +368,7 @@ class GenericReportProcessor:
             raise
 
     @staticmethod
-    def process_data(dataframes: dict[str, pd.DataFrame], processing_functions: dict[str, callable]) -> dict[str, pd.DataFrame]:
+    def process_data(dataframes: dict[str, pd.DataFrame], processing_functions: dict[str, Callable[[pd.DataFrame], pd.DataFrame]]) -> dict[str, pd.DataFrame]:
         """
         Processes multiple DataFrames using their respective custom processing functions.
 
@@ -291,7 +414,7 @@ class GenericReportProcessor:
             raise ValueError(f"Error combining data: {e}")
 
     @staticmethod
-    def calculate_metrics(data: pd.DataFrame, metrics_definitions: dict) -> pd.DataFrame:
+    def calculate_metrics(data: pd.DataFrame, metrics_definitions: dict[str, Callable[[pd.DataFrame], Any]]) -> pd.DataFrame:
         """
         Calculates metrics based on user-defined logic.
 
@@ -400,6 +523,13 @@ class GenericReportProcessor:
         :returns: None
         :raises: Exception if an error occurs during the export process
         """
+        self.logger.debug(f"Attempting to export data to Google Sheets: {sheet_name} in document {sheet_id}")
+
+        if not self.gc:  # Uses the lazy-initialized Google Sheets client
+            raise ValueError("Google Sheets client is not initialized. Cannot export data.")
+        if not self.drive:  # Uses the lazy-initialized Google Drive client
+            raise ValueError("Google Drive client is not initialized. Cannot export data.")
+
         try:
             # Cast specified date columns to string
             if date_columns:
@@ -441,14 +571,13 @@ class GenericReportProcessor:
         :raises: ValueError if the Slack token is missing.
         """
         self.logger.info(f"Sending Slack notification to channel: {channel_name}")
+        if not self.slack:  # Uses the lazy-initialized property
+            raise ConnectionError("Slack is not initialized. Cannot send notification.")
+
         try:
-            if self.slack:
-                full_message = f"{message} for the week of {self.current_week.strftime('%Y-%m-%d')}"
-                self.slack.chat_postMessage(channel=channel_name, text=full_message)
-                self.logger.info(f"Slack notification sent successfully")
-            else:
-                self.logger.error("Slack token not found. Cannot send Slack notification.")
-                raise ValueError("Slack token not found. Cannot send Slack notification.")
+            full_message = f"{message} for the week of {self.current_week.strftime('%Y-%m-%d')}"
+            self.slack.chat_postMessage(channel=channel_name, text=full_message)
+            self.logger.info(f"Slack notification sent successfully")
         except Exception as e:
             self.logger.error(f"Error sending Slack notification: {e}")
             raise
