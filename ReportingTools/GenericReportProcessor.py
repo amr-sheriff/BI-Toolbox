@@ -10,7 +10,7 @@ import gspread
 from pydrive.auth import GoogleAuth
 from pydrive.drive import GoogleDrive
 from sqlalchemy import create_engine
-from CredManager import CredManager
+from Connector.CredManager import CredManager
 
 
 class GenericReportProcessor:
