@@ -1,9 +1,30 @@
 [tool.poetry]
-name = "bi_tools"
-version = "0.1.0"
-description = "BI tools package for report processing, including S3, Slack, Google Sheets, and database integrations."
+name = "bi-toolbox"
+version = "0.1.0a1"
+description = "A comprehensive BI tools package for automated report processing and data integration, supporting S3, Slack, Email, Google Sheets, Tableau, and various database connections."
 authors = ["Amr Sherif <amr.achraff@gmail.com>"]
-license = "MIT"
+license = "Apache-2.0"
+maintainers = ["Amr Sherif <amr.achraff@gmail.com>"]
+readme = "README.md"
+packages = [
+    { include = "ReportingTools", from = "src" },
+    { include = "CredManager", from = "src" }
+]
+#homepage = ""
+repository = "https://github.com/amr-sheriff/BI-Toolbox/tree/main"
+#documentation = ""
+keywords = ["BI", "reporting", "S3", "Slack", "Google Sheets", "database", "Redshift", "Postgres"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Data Scientists",
+    "Intended Audience :: Information Technology",
+    "Intended Audience :: Science/Research",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Software Development :: Build Tools",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence"
+]
 
 [tool.poetry.dependencies]
 python = "^3.8"
@@ -18,7 +39,7 @@ google-auth = "^1.30.0"
 google-auth-oauthlib = "^0.4.4"
 dask = "^2021.6.2"
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 pytest = "^6.2.0"
 
 [build-system]
