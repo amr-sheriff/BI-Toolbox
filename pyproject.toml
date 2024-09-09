@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "bi-toolbox"
+name = "bi_toolbox"
 version = "0.1.0a1"
 description = "A comprehensive BI tools package for automated report processing and data integration, supporting S3, Slack, Email, Google Sheets, Tableau, and various database connections."
 authors = ["Amr Sherif <amr.achraff@gmail.com>"]
@@ -7,8 +7,7 @@ license = "Apache-2.0"
 maintainers = ["Amr Sherif <amr.achraff@gmail.com>"]
 readme = "README.md"
 packages = [
-    { include = "ReportingTools", from = "src" },
-    { include = "CredManager", from = "src" }
+    { include = "bi_toolbox", from = "src" }
 ]
 #homepage = ""
 repository = "https://github.com/amr-sheriff/BI-Toolbox/tree/main"
@@ -27,20 +26,25 @@ classifiers = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.8"
-pandas = "^1.3.0"
+python = "^3.9"
+pandas = "^2.2.0"
 boto3 = "^1.17.0"
-slack-sdk = "^3.9.0"
-gspread = "^5.0.0"
+slack-sdk = "^3.32.0"
+gspread = "^6.1.2"
 pydrive = "^1.3.1"
-SQLAlchemy = "^1.4.0"
-pydantic = "^1.8.2"
-google-auth = "^1.30.0"
-google-auth-oauthlib = "^0.4.4"
-dask = "^2021.6.2"
+SQLAlchemy = "^2.0.0"
+pydantic = "^2.9.0"
+google-auth = "^2.34.0"
+google-auth-oauthlib = "^1.2.1"
+python-dotenv = "^1.0.0"
+dask = "^2024.8.0"
+gspread-dataframe = "^4.0.0"
 
 [tool.poetry.group.dev.dependencies]
-pytest = "^6.2.0"
+pytest = "^8.3.2"
+ipykernel = "^6.29.5"
+ipywidgets = "^8.1.5"
+notebook = "^7.2.2"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

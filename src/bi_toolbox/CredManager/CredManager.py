@@ -1,12 +1,12 @@
-from pydantic import BaseModel, Field, ValidationError
+from pydantic.v1 import BaseModel, Field
 import dotenv
 from google.oauth2.service_account import Credentials
 from typing import Optional
 
 
 class CredManagerConfig(BaseModel):
-    aws_access_key_id: str = Field(..., env='AWS_ACCESS_KEY_ID')
-    aws_secret_access_key: str = Field(..., env='AWS_SECRET_ACCESS_KEY')
+    aws_access_key_id: Optional[str] = Field(None, env='AWS_ACCESS_KEY_ID')
+    aws_secret_access_key: Optional[str] = Field(None, env='AWS_SECRET_ACCESS_KEY')
     slack_token: Optional[str] = Field(None, env='SLACK_TOKEN')
     google_creds_key_path: Optional[str] = Field(None, env='GOOGLE_CREDS_KEY_PATH')
     db_user: Optional[str] = Field(None, env='DB_USER')

@@ -1,0 +1,125 @@
+2024-09-09 14:35:41,863 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - Logger initialized. Logging to file: logs/default.log with both size-based and time-based rotation, and console.
+2024-09-09 14:39:36,635 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - This is an info message.
+2024-09-09 14:39:36,637 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - custom - This is an info message.
+2024-09-09 14:41:00,069 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - Google Drive client initialized successfully.
+2024-09-09 14:41:10,646 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - This is an info message.
+2024-09-09 14:41:46,784 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - This is an info message.
+2024-09-09 14:42:04,510 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - Logger initialized. Logging to file: logs/default.log with both size-based and time-based rotation, and console.
+2024-09-09 14:42:27,299 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - This is an info message.
+2024-09-09 14:42:44,083 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - This is an info message.
+2024-09-09 14:43:03,443 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - This is an info message.
+2024-09-09 14:43:53,836 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - This is an info message.
+2024-09-09 14:46:52,874 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - This is an info message.
+2024-09-09 15:47:51,651 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - Logger initialized. Logging to file: logs/default.log with both size-based and time-based rotation, and console.
+2024-09-09 15:47:51,651 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - Setting up the environment for the required services.
+2024-09-09 15:47:51,652 - bi_toolbox.ReportingTools.GenericReportProcessor - WARNING - Slack is not properly configured. SLACK_TOKEN is missing.
+2024-09-09 15:47:51,652 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - Environment setup complete. Services will be initialized lazily when accessed.
+2024-09-09 15:47:51,653 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - Lazy initialization mode enabled. Services will be initialized on demand.
+2024-09-09 16:14:47,315 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - Logger initialized. Logging to file: logs/default.log with both size-based and time-based rotation, and console.
+2024-09-09 16:14:47,316 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - Setting up the environment for the required services.
+2024-09-09 16:14:47,317 - bi_toolbox.ReportingTools.GenericReportProcessor - WARNING - Slack is not properly configured. SLACK_TOKEN is missing.
+2024-09-09 16:14:47,317 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - Environment setup complete. Services will be initialized lazily when accessed.
+2024-09-09 16:14:47,318 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - Lazy initialization mode enabled. Services will be initialized on demand.
+2024-09-09 16:17:10,948 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - Setting up the environment for the required services.
+2024-09-09 16:17:10,949 - bi_toolbox.ReportingTools.GenericReportProcessor - WARNING - Slack is not properly configured. SLACK_TOKEN is missing.
+2024-09-09 16:17:10,950 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - Environment setup complete. Services will be initialized lazily when accessed.
+2024-09-09 16:17:10,950 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - Lazy initialization mode enabled. Services will be initialized on demand.
+2024-09-09 16:19:12,355 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - Setting up the environment for the required services.
+2024-09-09 16:19:12,356 - bi_toolbox.ReportingTools.GenericReportProcessor - WARNING - Slack is not properly configured. SLACK_TOKEN is missing.
+2024-09-09 16:19:12,357 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - Environment setup complete. Services will be initialized lazily when accessed.
+2024-09-09 16:19:12,358 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - Lazy initialization mode enabled. Services will be initialized on demand.
+2024-09-09 16:25:52,571 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - Logger initialized. Logging to file: logs/default.log with both size-based and time-based rotation, and console.
+2024-09-09 16:25:52,571 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - Setting up the environment for the required services.
+2024-09-09 16:25:52,572 - bi_toolbox.ReportingTools.GenericReportProcessor - DEBUG - Slack token: None
+2024-09-09 16:25:52,573 - bi_toolbox.ReportingTools.GenericReportProcessor - WARNING - Slack is not properly configured. SLACK_TOKEN is missing.
+2024-09-09 16:25:52,574 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - Environment setup complete. Services will be initialized lazily when accessed.
+2024-09-09 16:25:52,574 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - Lazy initialization mode enabled. Services will be initialized on demand.
+2024-09-09 16:38:05,266 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - Setting up the environment for the required services.
+2024-09-09 16:38:05,268 - bi_toolbox.ReportingTools.GenericReportProcessor - DEBUG - Slack token: None
+2024-09-09 16:38:05,268 - bi_toolbox.ReportingTools.GenericReportProcessor - WARNING - Slack is not properly configured. SLACK_TOKEN is missing.
+2024-09-09 16:38:05,269 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - Environment setup complete. Services will be initialized lazily when accessed.
+2024-09-09 16:38:05,270 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - Lazy initialization mode enabled. Services will be initialized on demand.
+2024-09-09 16:38:37,650 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - Logger initialized. Logging to file: logs/default.log with both size-based and time-based rotation, and console.
+2024-09-09 16:38:37,651 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - Setting up the environment for the required services.
+2024-09-09 16:38:37,652 - bi_toolbox.ReportingTools.GenericReportProcessor - DEBUG - Slack token: None
+2024-09-09 16:38:37,653 - bi_toolbox.ReportingTools.GenericReportProcessor - WARNING - Slack is not properly configured. SLACK_TOKEN is missing.
+2024-09-09 16:38:37,654 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - Environment setup complete. Services will be initialized lazily when accessed.
+2024-09-09 16:38:37,654 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - Lazy initialization mode enabled. Services will be initialized on demand.
+2024-09-09 16:45:42,955 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - Logger initialized. Logging to file: logs/default.log with both size-based and time-based rotation, and console.
+2024-09-09 16:45:42,957 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - Setting up the environment for the required services.
+2024-09-09 16:45:42,957 - bi_toolbox.ReportingTools.GenericReportProcessor - DEBUG - Slack token: None
+2024-09-09 16:45:42,958 - bi_toolbox.ReportingTools.GenericReportProcessor - WARNING - Slack is not properly configured. SLACK_TOKEN is missing.
+2024-09-09 16:45:42,958 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - Environment setup complete. Services will be initialized lazily when accessed.
+2024-09-09 16:45:42,959 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - Lazy initialization mode enabled. Services will be initialized on demand.
+2024-09-09 16:46:23,068 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - Logger initialized. Logging to file: logs/default.log with both size-based and time-based rotation, and console.
+2024-09-09 16:46:23,069 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - Setting up the environment for the required services.
+2024-09-09 16:46:23,070 - bi_toolbox.ReportingTools.GenericReportProcessor - DEBUG - Slack token: None
+2024-09-09 16:46:23,071 - bi_toolbox.ReportingTools.GenericReportProcessor - WARNING - Slack is not properly configured. SLACK_TOKEN is missing.
+2024-09-09 16:46:23,071 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - Environment setup complete. Services will be initialized lazily when accessed.
+2024-09-09 16:46:23,072 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - Lazy initialization mode enabled. Services will be initialized on demand.
+2024-09-09 16:50:15,991 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - Logger initialized. Logging to file: logs/default.log with both size-based and time-based rotation, and console.
+2024-09-09 16:50:15,991 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - Setting up the environment for the required services.
+2024-09-09 16:50:15,992 - bi_toolbox.ReportingTools.GenericReportProcessor - DEBUG - Slack token: None
+2024-09-09 16:50:15,993 - bi_toolbox.ReportingTools.GenericReportProcessor - WARNING - Slack is not properly configured. SLACK_TOKEN is missing.
+2024-09-09 16:50:15,994 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - Environment setup complete. Services will be initialized lazily when accessed.
+2024-09-09 16:50:15,994 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - Lazy initialization mode enabled. Services will be initialized on demand.
+2024-09-09 17:04:50,540 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - Logger initialized. Logging to file: logs/default.log with both size-based and time-based rotation, and console.
+2024-09-09 17:04:50,541 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - Setting up the environment for the required services.
+2024-09-09 17:04:50,542 - bi_toolbox.ReportingTools.GenericReportProcessor - WARNING - S3 is not properly configured. AWS credentials are missing.
+2024-09-09 17:04:50,543 - bi_toolbox.ReportingTools.GenericReportProcessor - WARNING - Redshift is not properly configured. Redshift credentials are missing.
+2024-09-09 17:04:50,543 - bi_toolbox.ReportingTools.GenericReportProcessor - WARNING - Slack is not properly configured. SLACK_TOKEN is missing.
+2024-09-09 17:04:50,544 - bi_toolbox.ReportingTools.GenericReportProcessor - WARNING - S3 is not properly configured. AWS credentials are missing.
+2024-09-09 17:04:50,544 - bi_toolbox.ReportingTools.GenericReportProcessor - WARNING - Redshift is not properly configured. Redshift credentials are missing.
+2024-09-09 17:04:50,545 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - Environment setup complete. Services will be initialized lazily when accessed.
+2024-09-09 17:04:50,545 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - Lazy initialization mode enabled. Services will be initialized on demand.
+2024-09-09 17:05:43,953 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - Setting up the environment for the required services.
+2024-09-09 17:05:43,954 - bi_toolbox.ReportingTools.GenericReportProcessor - WARNING - S3 is not properly configured. AWS credentials are missing.
+2024-09-09 17:05:43,955 - bi_toolbox.ReportingTools.GenericReportProcessor - WARNING - Redshift is not properly configured. Redshift credentials are missing.
+2024-09-09 17:05:43,956 - bi_toolbox.ReportingTools.GenericReportProcessor - WARNING - Slack is not properly configured. SLACK_TOKEN is missing.
+2024-09-09 17:05:43,956 - bi_toolbox.ReportingTools.GenericReportProcessor - WARNING - S3 is not properly configured. AWS credentials are missing.
+2024-09-09 17:05:43,957 - bi_toolbox.ReportingTools.GenericReportProcessor - WARNING - Redshift is not properly configured. Redshift credentials are missing.
+2024-09-09 17:05:43,957 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - Environment setup complete. Services will be initialized lazily when accessed.
+2024-09-09 17:05:43,958 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - Lazy initialization mode enabled. Services will be initialized on demand.
+2024-09-09 17:24:43,380 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - Logger initialized. Logging to file: logs/default.log with both size-based and time-based rotation, and console.
+2024-09-09 17:24:43,382 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - Setting up the environment for the required services.
+2024-09-09 17:24:43,383 - bi_toolbox.ReportingTools.GenericReportProcessor - WARNING - S3 is not properly configured. AWS credentials are missing.
+2024-09-09 17:24:43,383 - bi_toolbox.ReportingTools.GenericReportProcessor - WARNING - Slack is not properly configured. SLACK_TOKEN is missing.
+2024-09-09 17:24:43,384 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - Environment setup complete. Services will be initialized lazily when accessed.
+2024-09-09 17:24:43,385 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - Lazy initialization mode enabled. Services will be initialized on demand.
+2024-09-09 17:25:27,863 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - Setting up the environment for the required services.
+2024-09-09 17:25:27,864 - bi_toolbox.ReportingTools.GenericReportProcessor - WARNING - S3 is not properly configured. AWS credentials are missing.
+2024-09-09 17:25:27,865 - bi_toolbox.ReportingTools.GenericReportProcessor - WARNING - Slack is not properly configured. SLACK_TOKEN is missing.
+2024-09-09 17:25:27,866 - bi_toolbox.ReportingTools.GenericReportProcessor - WARNING - Redshift is not properly configured. Redshift credentials are missing.
+2024-09-09 17:25:27,866 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - Environment setup complete. Services will be initialized lazily when accessed.
+2024-09-09 17:25:27,867 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - Lazy initialization mode enabled. Services will be initialized on demand.
+2024-09-09 17:25:51,284 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - Setting up the environment for the required services.
+2024-09-09 17:25:51,285 - bi_toolbox.ReportingTools.GenericReportProcessor - WARNING - S3 is not properly configured. AWS credentials are missing.
+2024-09-09 17:25:51,286 - bi_toolbox.ReportingTools.GenericReportProcessor - WARNING - Slack is not properly configured. SLACK_TOKEN is missing.
+2024-09-09 17:25:51,287 - bi_toolbox.ReportingTools.GenericReportProcessor - WARNING - Google Drive/Sheets is not properly configured. Google credentials are missing.
+2024-09-09 17:25:51,287 - bi_toolbox.ReportingTools.GenericReportProcessor - WARNING - Redshift is not properly configured. Redshift credentials are missing.
+2024-09-09 17:25:51,288 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - Environment setup complete. Services will be initialized lazily when accessed.
+2024-09-09 17:25:51,288 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - Lazy initialization mode enabled. Services will be initialized on demand.
+2024-09-09 17:26:20,514 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - Setting up the environment for the required services.
+2024-09-09 17:26:20,515 - bi_toolbox.ReportingTools.GenericReportProcessor - WARNING - S3 is not properly configured. AWS credentials are missing.
+2024-09-09 17:26:20,516 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - Environment setup complete. Services will be initialized lazily when accessed.
+2024-09-09 17:26:20,517 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - Lazy initialization mode enabled. Services will be initialized on demand.
+2024-09-09 17:26:57,936 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - Setting up the environment for the required services.
+2024-09-09 17:26:57,937 - bi_toolbox.ReportingTools.GenericReportProcessor - WARNING - S3 is not properly configured. AWS credentials are missing.
+2024-09-09 17:26:57,938 - bi_toolbox.ReportingTools.GenericReportProcessor - WARNING - Slack is not properly configured. SLACK_TOKEN is missing.
+2024-09-09 17:26:57,939 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - Environment setup complete. Services will be initialized lazily when accessed.
+2024-09-09 17:26:57,940 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - Eager initialization mode enabled. Initializing all services upfront.
+2024-09-09 17:26:57,941 - bi_toolbox.ReportingTools.GenericReportProcessor - DEBUG - Initializing S3 service.
+2024-09-09 17:26:57,942 - bi_toolbox.ReportingTools.GenericReportProcessor - WARNING - AWS S3 credentials missing. S3 data retrieval will be unavailable.
+2024-09-09 17:26:57,942 - bi_toolbox.ReportingTools.GenericReportProcessor - DEBUG - Initializing Slack client.
+2024-09-09 17:26:57,943 - bi_toolbox.ReportingTools.GenericReportProcessor - WARNING - Slack token not found. Slack notifications will be unavailable.
+2024-09-09 17:26:57,944 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - All services initialized eagerly.
+2024-09-09 17:27:07,603 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - Setting up the environment for the required services.
+2024-09-09 17:27:07,605 - bi_toolbox.ReportingTools.GenericReportProcessor - WARNING - S3 is not properly configured. AWS credentials are missing.
+2024-09-09 17:27:07,605 - bi_toolbox.ReportingTools.GenericReportProcessor - WARNING - Slack is not properly configured. SLACK_TOKEN is missing.
+2024-09-09 17:27:07,606 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - Environment setup complete. Services will be initialized lazily when accessed.
+2024-09-09 17:27:07,607 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - Eager initialization mode enabled. Initializing all services upfront.
+2024-09-09 17:27:07,607 - bi_toolbox.ReportingTools.GenericReportProcessor - DEBUG - Initializing S3 service.
+2024-09-09 17:27:07,608 - bi_toolbox.ReportingTools.GenericReportProcessor - WARNING - AWS S3 credentials missing. S3 data retrieval will be unavailable.
+2024-09-09 17:27:07,608 - bi_toolbox.ReportingTools.GenericReportProcessor - DEBUG - Initializing Slack client.
+2024-09-09 17:27:07,609 - bi_toolbox.ReportingTools.GenericReportProcessor - WARNING - Slack token not found. Slack notifications will be unavailable.
+2024-09-09 17:27:07,610 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - All services initialized eagerly.

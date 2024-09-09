@@ -1,7 +1,7 @@
 import os
 from typing import Optional, Callable, Any
 import logging
-from logging.handlers import RotatingFileHandler, TimedRotatingFileHandler
+from logging.handlers import RotatingFileHandler
 import boto3
 import pandas as pd
 from datetime import date, timedelta
@@ -10,7 +10,8 @@ import gspread
 from pydrive.auth import GoogleAuth
 from pydrive.drive import GoogleDrive
 from sqlalchemy import create_engine
-from CredManager.CredManager import CredManager
+from bi_toolbox.CredManager.CredManager import CredManager
+from gspread_dataframe import set_with_dataframe#, get_as_dataframe
 
 
 class GenericReportProcessor:
@@ -19,22 +20,17 @@ class GenericReportProcessor:
     log_level = None
     max_log_size = None
     backup_count_size = None
-    rotation_interval = None
-    backup_count_time = None
 
-    def __init__(self, cred_manager: callable = CredManager, log_file_path: str = 'logs/default.log', log_level: str = 'INFO',
-                 max_log_size: int = 10485760, backup_count_size: int = 3,
-                 rotation_interval: str = 'midnight', backup_count_time: int = 3):
+    def __init__(self, cred_manager: callable = CredManager(), log_file_path: str = 'logs/default.log', log_level: str = 'INFO',
+                 max_log_size: int = 10485760, backup_count_size: int = 3):
         """
         Initialize the processor with a configurable log file path, log level, and log rotation
-        based on both file size and time intervals.
+        based on file size.
 
         :param log_file_path: Path to the log file.
         :param log_level: Logging level as a string (e.g., 'DEBUG', 'INFO').
         :param max_log_size: Maximum log file size in bytes before rotating based on size.
         :param backup_count_size: Number of backup log files to retain after rotation based on size.
-        :param rotation_interval: Log rotation interval for timed rotation ('S', 'M', 'H', 'D', 'midnight', etc.).
-        :param backup_count_time: Number of backup log files to retain after rotation based on time.
         """
         log_dir = os.path.dirname(log_file_path)
         if not os.path.exists(log_dir):
@@ -42,7 +38,7 @@ class GenericReportProcessor:
             print(f"Created log directory: {log_dir}")
 
         if GenericReportProcessor.logger is None:
-            self._initialize_logger(log_file_path, log_level, max_log_size, backup_count_size, rotation_interval, backup_count_time)
+            self._initialize_logger(log_file_path, log_level, max_log_size, backup_count_size)
 
         self.cred_manager = cred_manager
         self._s3 = None
@@ -56,17 +52,14 @@ class GenericReportProcessor:
         self.third_week_before: Optional[date] = None
 
     @classmethod
-    def _initialize_logger(cls, log_file_path: str, log_level: str, max_log_size: int, backup_count_size: int,
-                           rotation_interval: str, backup_count_time: int) -> None:
+    def _initialize_logger(cls, log_file_path: str, log_level: str, max_log_size: int, backup_count_size: int) -> None:
         """
-        Class method to initialize the logger with both file size-based and time-based rotation.
+        Class method to initialize the logger with file size-based rotation.
 
         :param log_file_path: Path to the log file.
         :param log_level: Logging level as a string (e.g., 'DEBUG', 'INFO').
         :param max_log_size: Maximum log file size in bytes before rotating based on size.
         :param backup_count_size: Number of backup log files to retain after size-based rotation.
-        :param rotation_interval: Time interval for rotating log files ('midnight' for daily rotation, or 'S', 'M', 'H', 'D').
-        :param backup_count_time: Number of backup log files to retain after time-based rotation.
         """
         cls.logger = logging.getLogger(__name__)
         cls.logger.setLevel(logging.getLevelName(log_level.upper()))
@@ -77,11 +70,6 @@ class GenericReportProcessor:
             file_size_handler.setFormatter(file_size_format)
             cls.logger.addHandler(file_size_handler)
 
-            timed_handler = TimedRotatingFileHandler(log_file_path, when=rotation_interval, interval=1, backupCount=backup_count_time)
-            timed_format = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-            timed_handler.setFormatter(timed_format)
-            cls.logger.addHandler(timed_handler)
-
             console_handler = logging.StreamHandler()
             console_format = logging.Formatter('%(name)s - %(levelname)s - %(message)s')
             console_handler.setFormatter(console_format)
@@ -91,8 +79,6 @@ class GenericReportProcessor:
             cls.log_level = log_level
             cls.max_log_size = max_log_size
             cls.backup_count_size = backup_count_size
-            cls.rotation_interval = rotation_interval
-            cls.backup_count_time = backup_count_time
 
             cls.logger.info(f"Logger initialized. Logging to file: {log_file_path} with both size-based and time-based rotation, and console.")
 
@@ -106,16 +92,12 @@ class GenericReportProcessor:
         """
         if cls.logger is not None:
             for handler in cls.logger.handlers[:]:
-                if isinstance(handler, (RotatingFileHandler, TimedRotatingFileHandler)):
+                if isinstance(handler, RotatingFileHandler):
                     cls.logger.removeHandler(handler)
 
             file_size_handler = RotatingFileHandler(path, maxBytes=cls.max_log_size, backupCount=cls.backup_count_size)
             file_size_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
             cls.logger.addHandler(file_size_handler)
-
-            timed_handler = TimedRotatingFileHandler(path, when=cls.rotation_interval, interval=1, backupCount=cls.backup_count_time)
-            timed_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
-            cls.logger.addHandler(timed_handler)
 
             cls.logger.info(f"Logger file path changed to {path}")
 
@@ -137,12 +119,12 @@ class GenericReportProcessor:
             for service in services:
                 if service == 's3':
                     _ = instance.s3
-                elif service == 'slack':
+                if service == 'slack':
                     _ = instance.slack
-                elif service == 'google_drive':
+                if service == 'google_drive':
                     _ = instance.gc
                     _ = instance.drive
-                elif service == 'redshift':
+                if service == 'redshift':
                     _ = instance.db_conn
             instance.logger.info("All services initialized eagerly.")
         else:
@@ -251,11 +233,14 @@ class GenericReportProcessor:
             try:
                 if service == 'slack' and not self.cred_manager.get_slack_token():
                     self.logger.warning("Slack is not properly configured. SLACK_TOKEN is missing.")
-                if service == 's3' and not self.cred_manager.get_aws_credentials():
+                if service == 's3' and (not self.cred_manager.get_aws_credentials()[0] or not self.cred_manager.get_aws_credentials()[1]):
                     self.logger.warning("S3 is not properly configured. AWS credentials are missing.")
                 if service == 'google_drive' and not self.cred_manager.get_google_credentials():
                     self.logger.warning("Google Drive/Sheets is not properly configured. Google credentials are missing.")
-                if service == 'redshift' and not self.cred_manager.get_db_credentials():
+                if service == 'redshift' and (not self.cred_manager.get_db_credentials().get('user')
+                        or not self.cred_manager.get_db_credentials().get('password')
+                        or not self.cred_manager.get_db_credentials().get('host')
+                        or not self.cred_manager.get_db_credentials().get('db_name')):
                     self.logger.warning("Redshift is not properly configured. Redshift credentials are missing.")
             except ValueError as e:
                 self.logger.error(f"Error setting up environment for service {service}: {e}")
@@ -275,6 +260,7 @@ class GenericReportProcessor:
 
         :return: pd.DataFrame - The retrieved data as a Pandas DataFrame.
         """
+        # TODO: Implement the data retrieval logic from google sheets
         self.logger.info(f"Retrieving data from {data_source_type}")
         try:
             if data_source_type == 's3':
@@ -380,6 +366,8 @@ class GenericReportProcessor:
         except Exception as e:
             GenericReportProcessor.logger.error(f"Error retrieving data from local file: {str(e)}")
             raise
+
+    # TODO: Implement _retrieve_from_google_sheets method
 
     @staticmethod
     def process_data(dataframes: dict[str, pd.DataFrame], processing_functions: dict[str, Callable[[pd.DataFrame], pd.DataFrame]]) -> dict[str, pd.DataFrame]:
@@ -558,7 +546,7 @@ class GenericReportProcessor:
 
             if first_time:
                 worksheet.clear()
-                gs.set_with_dataframe(worksheet=worksheet, dataframe=data, include_index=False, include_column_header=True, resize=True)
+                set_with_dataframe(worksheet=worksheet, dataframe=data, include_index=False, include_column_header=True, resize=True)
             else:
                 data_values = data.values.tolist()
                 gs.values_append(sheet_name, {'valueInputOption': 'RAW'}, {'values': data_values})
