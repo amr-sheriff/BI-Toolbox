@@ -562,7 +562,7 @@ See the full list of integrations in the Section Navigation.
         f.write(doc)
 
     dummy_index = """\
-# API reference
+# Codebase Reference
 
 ```{toctree}
 :maxdepth: 3
