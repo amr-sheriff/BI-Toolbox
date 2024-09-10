@@ -10,7 +10,7 @@ import gspread
 from pydrive.auth import GoogleAuth
 from pydrive.drive import GoogleDrive
 from sqlalchemy import create_engine
-from bi_toolbox.CredManager.CredManager import CredManager
+from bi_toolbox.utils.CredManager import CredManager
 from gspread_dataframe import set_with_dataframe#, get_as_dataframe
 
 
