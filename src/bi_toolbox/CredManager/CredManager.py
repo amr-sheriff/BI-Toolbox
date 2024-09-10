@@ -5,6 +5,33 @@ from typing import Optional
 
 
 class CredManagerConfig(BaseModel):
+    """
+    Configuration model for managing credentials.
+
+    Attributes
+    ----------
+    aws_access_key_id : Optional[str]
+        AWS access key ID, loaded from the environment variable 'AWS_ACCESS_KEY_ID'.
+    aws_secret_access_key : Optional[str]
+        AWS secret access key, loaded from the environment variable 'AWS_SECRET_ACCESS_KEY'.
+    slack_token : Optional[str]
+        Slack token, loaded from the environment variable 'SLACK_TOKEN'.
+    google_creds_key_path : Optional[str]
+        Path to the Google credentials key file, loaded from the environment variable 'GOOGLE_CREDS_KEY_PATH'.
+    db_user : Optional[str]
+        Database user, loaded from the environment variable 'DB_USER'.
+    db_password : Optional[str]
+        Database password, loaded from the environment variable 'DB_PASSWORD'.
+    db_host : Optional[str]
+        Database host, loaded from the environment variable 'DB_HOST'.
+    db_name : Optional[str]
+        Database name, loaded from the environment variable 'DB_NAME'.
+
+    Config
+    ------
+    env_file : str
+        Specifies the environment file to load variables from.
+    """
     aws_access_key_id: Optional[str] = Field(None, env='AWS_ACCESS_KEY_ID')
     aws_secret_access_key: Optional[str] = Field(None, env='AWS_SECRET_ACCESS_KEY')
     slack_token: Optional[str] = Field(None, env='SLACK_TOKEN')
@@ -15,10 +42,24 @@ class CredManagerConfig(BaseModel):
     db_name: Optional[str] = Field(None, env='DB_NAME')
 
     class Config:
+        """
+        Pydantic configuration class for `CredManagerConfig`.
+
+        Attributes
+        ----------
+        env_file : str
+            Specifies the environment file to load variables from.
+        """
         env_file = '.env'
 
 class CredManager:
+    """
+    Credential Manager for loading and accessing various credentials.
+    """
     def __init__(self):
+        """
+        Initialize the CredManager and load environment variables.
+        """
         dotenv.load_dotenv()
         self.config = CredManagerConfig()
 
