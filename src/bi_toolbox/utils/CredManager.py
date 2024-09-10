@@ -27,10 +27,6 @@ class CredManagerConfig(BaseModel):
     db_name : Optional[str]
         Database name, loaded from the environment variable 'DB_NAME'.
 
-    Config
-    ------
-    env_file : str
-        Specifies the environment file to load variables from.
     """
     aws_access_key_id: Optional[str] = Field(None, env='AWS_ACCESS_KEY_ID')
     aws_secret_access_key: Optional[str] = Field(None, env='AWS_SECRET_ACCESS_KEY')
@@ -58,7 +54,7 @@ class CredManager:
     """
     def __init__(self):
         """
-        Initialize the CredManager and load environment variables.
+        Initialize the CredManager and load environment variables from `.env` file using `CredManagerConfig`.
         """
         dotenv.load_dotenv()
         self.config = CredManagerConfig()
@@ -66,21 +62,33 @@ class CredManager:
     def get_aws_credentials(self):
         """
         Get AWS credentials from environment variables.
-        :return: A tuple of (AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY)
+
+        Returns
+        -------
+        tuple
+            A tuple of (AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY).
         """
         return self.config.aws_access_key_id, self.config.aws_secret_access_key
 
     def get_slack_token(self):
         """
         Get Slack token from environment variables.
-        :return: Slack token
+
+        Returns
+        -------
+        str or None
+            Slack token if present, otherwise None.
         """
         return self.config.slack_token
 
     def get_google_credentials(self):
         """
         Get Google credentials from a service account file defined in environment variables.
-        :return: Google OAuth2 Credentials object
+
+        Returns
+        -------
+        google.oauth2.service_account.Credentials or None
+            Google OAuth2 Credentials object if credentials are available, otherwise None.
         """
         if not self.config.google_creds_key_path:
             return None
@@ -90,8 +98,12 @@ class CredManager:
 
     def get_db_credentials(self):
         """
-        Get Redshift database credentials from environment variables.
-        :return: A dictionary containing Redshift credentials
+        Get database credentials from environment variables.
+
+        Returns
+        -------
+        dict
+            A dictionary containing database credentials with keys 'user', 'password', 'host', and 'db_name'.
         """
         return {
             'user': self.config.db_user,

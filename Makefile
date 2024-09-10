@@ -16,6 +16,7 @@ all: help
 reference_docs_clean:
 	find ./docs/bi_toolbox -name '*.rst' -delete
 	git clean -fdX ./docs
+	rm -rf docs/bi_toolbox/
 	rm docs/index.md
 
 ## reference_docs_build: Build the Reference documentation.
