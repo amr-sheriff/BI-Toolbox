@@ -61,6 +61,7 @@ sphinx-copybutton = "^0.5.2"
 toml = "^0.10.2"
 sphinx-autobuild = "^2024.9.3"
 beautifulsoup4 = "^4.12.3"
+ipython = "8.18.1"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
