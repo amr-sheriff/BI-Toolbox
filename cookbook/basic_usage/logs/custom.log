@@ -1,8 +1,0 @@
-2024-09-09 14:47:05,452 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - Logger initialized. Logging to file: logs/custom.log with both size-based and time-based rotation, and console.
-2024-09-09 14:47:20,477 - bi_toolbox.ReportingTools.GenericReportProcessor - DEBUG - This is a debug message.
-2024-09-09 14:48:01,906 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - This is an info message.
-2024-09-09 14:48:01,907 - bi_toolbox.ReportingTools.GenericReportProcessor - DEBUG - This is a debug message.
-2024-09-09 14:48:31,079 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - This is an info message.
-2024-09-09 14:48:31,080 - bi_toolbox.ReportingTools.GenericReportProcessor - DEBUG - This is a debug message.
-2024-09-09 14:48:45,855 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - This is an info message.
-2024-09-09 14:48:45,856 - bi_toolbox.ReportingTools.GenericReportProcessor - DEBUG - This is a debug message.

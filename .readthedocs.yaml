@@ -1,0 +1,48 @@
+# Read the Docs configuration file
+# See https://docs.readthedocs.io/en/stable/config-file/v2.html for details
+
+# Required
+version: 2
+
+# Set the version of Python and other tools you might need
+build:
+  os: ubuntu-22.04
+  tools:
+    python: "3.9"
+#  commands:
+#    - mkdir -p $READTHEDOCS_OUTPUT
+#    - python docs/create_rst.py
+#    - sphinx-build -b html docs $READTHEDOCS_OUTPUT
+#    - cp -r _build/* $READTHEDOCS_OUTPUT
+  jobs:
+    post_checkout:
+      # Use `git log` to check if the latest commit contains "skip ci",
+      # in that case exit the command with 183 to cancel the build
+      - (git --no-pager log --pretty="tformat:%s -- %b" -1 | grep -viq "skip ci") || exit 183
+    post_create_environment:
+      # Install poetry
+      # https://python-poetry.org/docs/#installing-manually
+      - pip install poetry
+    post_install:
+      # Install dependencies with 'docs' dependency group
+      # https://python-poetry.org/docs/managing-dependencies/#dependency-groups
+      # VIRTUAL_ENV needs to be set manually for now.
+      # See https://github.com/readthedocs/readthedocs.org/pull/11152/
+      - VIRTUAL_ENV=$READTHEDOCS_VIRTUALENV_PATH poetry install --with docs
+    pre_build:
+      - poetry run python docs/create_rst.py
+    post_build:
+      - poetry run python docs/scripts/custom_formatter.py $READTHEDOCS_OUTPUT/html/
+
+# Build documentation in the docs/ directory with Sphinx
+sphinx:
+  configuration: docs/conf.py
+
+# If using Sphinx, optionally build your docs in additional formats such as PDF
+formats:
+  - pdf
+
+# Optionally declare the Python requirements required to build your docs
+#python:
+#  install:
+#    - requirements: docs/requirements.txt

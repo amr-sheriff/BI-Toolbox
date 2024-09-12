@@ -29,6 +29,45 @@ with (_DIR.parents[0] / "pyproject.toml").open("r") as f:
 # with (_DIR / "guide_imports.json").open("r") as f:
 #     imported_classes = json.load(f)
 
+
+# class ExampleLinksDirective(SphinxDirective):
+#     """Directive to generate a list of links to examples.
+#
+#     We have a script that extracts links to API reference docs
+#     from our notebook examples. This directive uses that information
+#     to backlink to the examples from the API reference docs."""
+#
+#     has_content = False
+#     required_arguments = 1
+#
+#     def run(self):
+#         """Run the directive.
+#
+#         Called any time :example_links:`ClassName` is used
+#         in the template *.rst files."""
+#         class_or_func_name = self.arguments[0]
+#         links = imported_classes.get(class_or_func_name, {})
+#         list_node = nodes.bullet_list()
+#         for doc_name, link in sorted(links.items()):
+#             item_node = nodes.list_item()
+#             para_node = nodes.paragraph()
+#             link_node = nodes.reference()
+#             link_node["refuri"] = link
+#             link_node.append(nodes.Text(doc_name))
+#             para_node.append(link_node)
+#             item_node.append(para_node)
+#             list_node.append(item_node)
+#         if list_node.children:
+#             title_node = nodes.rubric()
+#             title_node.append(nodes.Text(f"Examples using {class_or_func_name}"))
+#             return [title_node, list_node]
+#         return [list_node]
+
+
+# def setup(app):
+#     app.add_directive("example_links", ExampleLinksDirective)
+
+
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 

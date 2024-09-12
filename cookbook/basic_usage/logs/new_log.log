@@ -1,9 +1,0 @@
-2024-09-09 14:57:12,664 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - Logger file path changed to logs/new_log.log
-2024-09-09 14:57:34,329 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - This is an info message.
-2024-09-09 14:58:16,954 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - Setting up the environment for the required services.
-2024-09-09 14:58:28,361 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - Setting up the environment for the required services.
-2024-09-09 15:22:33,840 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - Setting up the environment for the required services.
-2024-09-09 15:28:46,987 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - Setting up the environment for the required services.
-2024-09-09 15:35:48,123 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - Setting up the environment for the required services.
-2024-09-09 15:37:13,044 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - Setting up the environment for the required services.
-2024-09-09 15:46:12,322 - bi_toolbox.ReportingTools.GenericReportProcessor - INFO - Setting up the environment for the required services.
