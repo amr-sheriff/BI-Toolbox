@@ -20,9 +20,9 @@ build:
       # in that case exit the command with 183 to cancel the build
       - (git --no-pager log --pretty="tformat:%s -- %b" -1 | grep -viq "skip ci") || exit 183
     pre_build:
-      - python -m docs/create_rst.py
+      - python docs/create_rst.py
     post_build:
-      - python -m docs/scripts/custom_formatter.py $READTHEDOCS_OUTPUT/html/
+      - python docs/scripts/custom_formatter.py $READTHEDOCS_OUTPUT/html/
 
 # Build documentation in the docs/ directory with Sphinx
 sphinx:
