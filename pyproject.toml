@@ -9,9 +9,9 @@ readme = "README.md"
 packages = [
     { include = "bi_toolbox", from = "src" }
 ]
-#homepage = ""
+homepage = "https://bi-toolbox.amrsherif.live/"
 repository = "https://github.com/amr-sheriff/BI-Toolbox/tree/main"
-#documentation = ""
+documentation = "https://bi-toolbox.amrsherif.live/en/latest/reference.html"
 keywords = ["BI", "reporting", "S3", "Slack", "Google Sheets", "database", "Redshift", "Postgres"]
 classifiers = [
     "Development Status :: 3 - Alpha",
