@@ -16,13 +16,13 @@ keywords = ["BI", "reporting", "S3", "Slack", "Google Sheets", "database", "Reds
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
-    "Intended Audience :: Data Scientists",
-    "Intended Audience :: Information Technology",
     "Intended Audience :: Science/Research",
+    "Intended Audience :: Information Technology",
+    "License :: OSI Approved :: Apache Software License",
     "Topic :: Software Development :: Libraries",
-    "Topic :: Software Development :: Build Tools",
     "Topic :: Scientific/Engineering :: Information Analysis",
-    "Topic :: Scientific/Engineering :: Artificial Intelligence"
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Scientific/Engineering :: Visualization"
 ]
 
 [tool.poetry.dependencies]
