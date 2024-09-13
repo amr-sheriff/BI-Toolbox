@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "bi_toolbox"
 version = "0.1.0a1"
-description = "A comprehensive BI tools package for automated report processing and data integration, supporting S3, Slack, Email, Google Sheets, Tableau, and various database connections."
+description = "An efficient and simple to use wrapper for streamlining BI workflows, integrating seamlessly with cloud services, databases, and reporting tools."
 authors = ["Amr Sherif <amr.achraff@gmail.com>"]
 license = "Apache-2.0"
 maintainers = ["Amr Sherif <amr.achraff@gmail.com>"]
